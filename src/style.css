@@ -17,15 +17,22 @@ body {
   margin: 0;
   display: flex;
   place-items: center;
+  justify-content: center;
+  flex-direction: column;
   min-width: 320px;
   min-height: 100vh;
 }
 
 canvas {
   display: block;
-  margin: auto;
   border: 1px solid #333;
   background-color: black;
 
   border-radius: 0.5rem;
+}
+
+.controlls {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
 }

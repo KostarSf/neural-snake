@@ -1,4 +1,4 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
@@ -11,5 +11,16 @@
     <canvas width="800" height="800" id="game-canvas"></canvas>
 
     <script type="module" src="/src/main.ts"></script>
+
+    <div class="controlls">
+      <p>
+        <label for="steps-per-frame">Speed:</label>
+        <input type="range" id="steps-per-frame" min="1" max="1000" value="1" />
+      </p>
+      <p>
+        <label for="frames-per-second">FPS:</label>
+        <input type="range" id="frames-per-second" min="1" max="60" value="60" />
+      </p>
+    </div>
   </body>
 </html>

@@ -61,14 +61,14 @@ export class Matrix {
         return this.map((value, i, j) => value * matrix.get(i, j));
     }
 
-    public geneticCross(matrix: Matrix, mutationRate: number): Matrix {
-        if (this.rows !== matrix.rows || this.columns !== matrix.columns) {
+    public static geneticCross(a: Matrix, b: Matrix, mutationRate: number): Matrix {
+        if (a.rows !== b.rows || a.columns !== b.columns) {
             throw new Error("Invalid matrix dimensions");
         }
 
-        return this.map((value, i, j) => {
+        return a.map((value, i, j) => {
             if (Math.random() > 0.5) {
-                value = matrix.get(i, j);
+                value = b.get(i, j);
             }
 
             if (Math.random() < mutationRate) {
@@ -77,6 +77,10 @@ export class Matrix {
 
             return value;
         });
+    }
+
+    public geneticCross(matrix: Matrix, mutationRate: number): Matrix {
+        return Matrix.geneticCross(this, matrix, mutationRate);
     }
 
     public static column(vector: number[]): Matrix {

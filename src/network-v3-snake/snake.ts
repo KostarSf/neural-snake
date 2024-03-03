@@ -1,9 +1,11 @@
 import { Board } from "./board";
-import { Brain } from "./brain";
+import { Brain } from "./math/brain";
 import { Point } from "./math/point";
 
 export class Snake {
     private readonly initialLength = 6;
+    private readonly initialTimeRemaining = 100;
+    private readonly timePerApple = 100;
 
     private _board: Board;
     private _brain: Brain;
@@ -22,21 +24,38 @@ export class Snake {
         return this.body[0];
     }
 
-    constructor(board: Board) {
+    public alive: boolean = true;
+    public lifetime: number = 0;
+    public applesEaten: number = 0;
+    public timeRemaining: number = this.initialTimeRemaining;
+
+    public get score(): number {
+        return Math.pow(this.lifetime, 2) + Math.pow(this.applesEaten * this.timePerApple, 2);
+    }
+
+    constructor(board: Board, brain?: Brain) {
         this._board = board;
-        this._brain = new Brain();
+        this._brain = brain ?? Brain.random();
 
         const pos = board.randomCell();
         this.body = new Array<Point>(this.initialLength).fill(pos);
     }
 
     public draw(context: CanvasRenderingContext2D): void {
+        if (!this.alive) {
+            return;
+        }
+
         this.body.forEach((point) => {
             this.board.drawCell(context, point, "white");
         });
     }
 
     public step(): void {
+        if (!this.alive) {
+            return;
+        }
+
         const observations = this.observe();
         const actions = this.brain.think(observations);
 
@@ -98,14 +117,29 @@ export class Snake {
     private move(direction: Point): void {
         const newHead = this.head.add(direction);
 
-        if (!this.board.contains(newHead) || this.body.some((point) => point.equals(newHead))) {
-            this.board.reset();
+        if (
+            !this.board.contains(newHead) ||
+            this.body.some((point) => point.equals(newHead)) ||
+            this.timeRemaining <= 0
+        ) {
+            this.alive = false;
             return;
         }
 
+        this.lifetime++;
+        this.timeRemaining--;
+
         this.body.unshift(newHead);
-        if (!newHead.equals(this.board.apple)) {
+        if (newHead.equals(this.board.apple)) {
+            this.applesEaten++;
+            this.timeRemaining += this.timePerApple;
+            this.board.placeApple();
+        } else {
             this.body.pop();
         }
+    }
+
+    public info(): string {
+        return `Lifetime: ${this.lifetime} \nRemain: ${this.timeRemaining} \nApples: ${this.applesEaten} \nScore: ${this.score}`;
     }
 }

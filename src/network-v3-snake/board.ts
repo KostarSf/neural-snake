@@ -1,57 +1,52 @@
+import { Brain } from "./math/brain";
 import { Point } from "./math/point";
 import { Snake } from "./snake";
 
 export class Board {
     // Allowed values are 0 .. 39
-    public readonly width: number = 40;
-    public readonly height: number = 40;
+    public static readonly width: number = 40;
+    public static readonly height: number = 40;
 
     /** Size of each cell in pixels */
-    public readonly size: number = 20;
+    public static readonly size: number = 20;
 
     public snake!: Snake;
     public apple!: Point;
 
-    constructor() {
-        this.reset();
+    constructor(brain?: Brain) {
+        this.snake = new Snake(this, brain);
+        this.placeApple();
     }
 
-    public reset(): void {
-        this.snake = new Snake(this);
+    public placeApple(): void {
         this.apple = this.randomCell();
     }
 
     public randomCell(): Point {
         return new Point(
-            Math.floor(Math.random() * this.width),
-            Math.floor(Math.random() * this.height)
+            Math.floor(Math.random() * Board.width),
+            Math.floor(Math.random() * Board.height)
         );
     }
 
     public contains(point: Point): boolean {
-        return point.x >= 0 && point.x < this.width && point.y >= 0 && point.y < this.height;
+        return point.x >= 0 && point.x < Board.width && point.y >= 0 && point.y < Board.height;
     }
 
-    public draw(context: CanvasRenderingContext2D): void {
-        context.clearRect(0, 0, this.width * this.size, this.height * this.size);
-
-        // this.drawBoard(context);
-
-        this.snake.draw(context);
-        this.drawCell(context, this.apple, "red");
+    public static clear(context: CanvasRenderingContext2D): void {
+        context.clearRect(0, 0, Board.width * Board.size, Board.height * Board.size);
     }
 
-    private drawBoard(context: CanvasRenderingContext2D): void {
-        context.strokeStyle = "#111111";
-        for (let x = 0; x < this.width; x++) {
-            for (let y = 0; y < this.height; y++) {
-                context.strokeRect(x * this.size, y * this.size, this.size, this.size);
-            }
+    public drawApple(context: CanvasRenderingContext2D): void {
+        if (!this.snake.alive) {
+            return;
         }
+
+        this.drawCell(context, this.apple, "red");
     }
 
     public drawCell(context: CanvasRenderingContext2D, point: Point, color: string): void {
         context.fillStyle = color;
-        context.fillRect(point.x * this.size, point.y * this.size, this.size, this.size);
+        context.fillRect(point.x * Board.size, point.y * Board.size, Board.size, Board.size);
     }
 }

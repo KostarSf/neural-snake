@@ -1,39 +1,53 @@
-import "./style.css"
-import { Board } from "./network-v3-snake/board";
+import { Game } from "./network-v3-snake/game";
+import "./style.css";
 
-const canvas = document.getElementById(
-  "game-canvas"
-) as HTMLCanvasElement | null;
+const canvas = document.getElementById("game-canvas") as HTMLCanvasElement | null;
+const context = canvas?.getContext("2d");
 
-const board = new Board();
-
-function draw() {
-  if (!canvas) {
+if (!canvas || !context) {
     throw new Error("Canvas not found");
-  }
-
-  const context = canvas.getContext("2d");
-  if (context) {
-    board.draw(context);
-  }
 }
 
-function setupTimer() {
-  return setInterval(() => {
-    board.snake.step();
-    draw();
-  }, 50);
+const game = new Game();
+
+game.draw(context!);
+
+let stepTimer: number | undefined
+let drawTimer: number | undefined;
+
+function setStepTimer(): void {
+    if (stepTimer) {
+        clearInterval(stepTimer);
+    }
+
+    stepTimer = setInterval(() => {
+        game.step();
+    }, 30);
 }
 
-let timer: number | undefined = setupTimer();
+function setDrawTimer(ms = 16): void {
+    if (drawTimer) {
+        clearInterval(drawTimer);
+    }
 
-canvas?.addEventListener("click", () => {
-  if (timer) {
-    clearInterval(timer);
-    timer = undefined;
-  } else {
-    timer = setupTimer();
-  }
+    drawTimer = setInterval(() => {
+        game.draw(context!);
+    }, ms);
+}
+
+setStepTimer();
+setDrawTimer();
+
+document.getElementById("steps-per-frame")?.addEventListener("input", (event) => {
+    const input = event.target as HTMLInputElement;
+    game.processFrames = parseInt(input.value, 10);
 });
 
-draw();
+document.getElementById("frames-per-second")?.addEventListener("input", (event) => {
+    const input = event.target as HTMLInputElement;
+    const fps = parseInt(input.value, 10);
+
+    // transform fps to ms
+    const ms = Math.ceil(1000 / fps);
+    setDrawTimer(ms);
+});
