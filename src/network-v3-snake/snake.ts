@@ -11,6 +11,7 @@ export class Snake {
     private _brain: Brain;
 
     private body: Point[];
+    private color: string = "white";
 
     public get board(): Board {
         return this._board;
@@ -39,6 +40,8 @@ export class Snake {
 
         const pos = board.randomCell();
         this.body = new Array<Point>(this.initialLength).fill(pos);
+
+        this.color = this.generateRandomColor();
     }
 
     public draw(context: CanvasRenderingContext2D): void {
@@ -47,8 +50,13 @@ export class Snake {
         }
 
         this.body.forEach((point) => {
-            this.board.drawCell(context, point, "white");
+            this.board.drawCell(context, point, this.color);
         });
+    }
+
+    private generateRandomColor(): string {
+        const random = () => Math.floor(Math.random() * 30 + 226);
+        return `rgb(${random()}, ${random()}, ${random()})`;
     }
 
     public step(): void {

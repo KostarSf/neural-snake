@@ -67,4 +67,17 @@ export class Brain {
             Matrix.geneticCross(a.hiddenToOutput, b.hiddenToOutput, Brain.mutationRate)
         );
     }
+
+    public toJSON() {
+        return {
+            inputToHidden: this.inputToHidden,
+            hiddenToOutput: this.hiddenToOutput,
+        };
+    }
+
+    public static fromJSON(json: string): Brain {
+        const { inputToHidden, hiddenToOutput } = JSON.parse(json);
+
+        return new Brain(new Matrix(inputToHidden), new Matrix(hiddenToOutput));
+    }
 }

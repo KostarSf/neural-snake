@@ -16,6 +16,10 @@ export class Breed {
         return this.scores.slice(0, n).map(([brain]) => brain);
     }
 
+    public best(): Brain {
+        return this.scores[0][0];
+    }
+
     public spawn(): Brain {
         return Brain.cross(this.chooseParent(), this.chooseParent());
     }

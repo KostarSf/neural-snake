@@ -90,4 +90,8 @@ export class Matrix {
     public flat(): number[] {
         return this.cells.flat();
     }
+
+    public toJSON(): number[][] {
+        return this.cells;
+    }
 }

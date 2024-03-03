@@ -1,4 +1,6 @@
 import { Board } from "./board";
+import { getDefaultProgress } from "./default-progress";
+import { Brain } from "./math/brain";
 import { Breed } from "./math/breed";
 import { Snake } from "./snake";
 
@@ -8,11 +10,17 @@ export class Game {
 
     private boards: Board[];
     private generation: number = 1;
+    private worlds: number = Game.worlds;
+    private keepTopN: number = Game.keepTopN;
 
     public processFrames: number = 1;
 
-    constructor() {
-        this.boards = new Array(Game.worlds).fill(0).map(() => new Board());
+    constructor(worlds: number = Game.worlds, keepTopN: number = Game.keepTopN) {
+        const [brain, generation] = this.loadSnakeAndGeneration();
+        this.worlds = worlds;
+        this.keepTopN = keepTopN;
+        this.generation = generation;
+        this.boards = new Array(this.worlds).fill(0).map(() => new Board(brain));
     }
 
     public step(): void {
@@ -39,11 +47,44 @@ export class Game {
     private nextGeneration(): void {
         const breed = new Breed(this.boards.map((board) => board.snake));
         const newGeneration = breed
-            .topN(Game.keepTopN)
-            .concat(new Array(Game.worlds - Game.keepTopN).fill(0).map(() => breed.spawn()));
+            .topN(this.keepTopN)
+            .concat(new Array(this.worlds - this.keepTopN).fill(0).map(() => breed.spawn()));
+
+        this.saveSnakeAndGeneration(newGeneration[0], this.generation);
 
         this.boards = newGeneration.map((brain) => new Board(brain));
         this.generation++;
+    }
+
+    public resetProgress(): void {
+        localStorage.removeItem("snake");
+        window.location.reload();
+    }
+
+    public defaultProgress(): void {
+        const [brain, generation] = getDefaultProgress();
+        this.saveSnakeAndGeneration(brain, generation);
+        window.location.reload();
+    }
+
+    private saveSnakeAndGeneration(brain: Brain, generation: number) {
+        const data = { brain: JSON.stringify(brain), generation };
+        localStorage.setItem("snake", JSON.stringify(data));
+    }
+
+    private loadSnakeAndGeneration(): [Brain | undefined, number] {
+        const data = localStorage.getItem("snake");
+        if (!data) {
+            return [...getDefaultProgress()];
+        }
+
+        try {
+            const { brain, generation } = JSON.parse(data);
+            return [Brain.fromJSON(brain), generation];
+        } catch (err) {
+            console.error(err);
+            return [undefined, 1];
+        }
     }
 
     public draw(context: CanvasRenderingContext2D): void {
